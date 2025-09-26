@@ -1,0 +1,59 @@
+
+backgrounds:
+  room: assets/backgrounds/room_day.jpg
+  room_night: assets/backgrounds/room_night.jpg
+  room_night_light: assets/backgrounds/room_night_light.jpg
+  
+  classroom: assets/backgrounds/classroom.jpeg
+  rumah: assets/backgrounds/rumah.jpeg
+  gasebo: assets/backgrounds/gasebo.jpeg
+  belajar: assets/backgrounds/belajar.jpeg
+  konser: assets/backgrounds/conceret.jpeg
+  next: assets/backgrounds/next.jpeg
+  taman: assets/backgrounds/taman.jpeg
+
+characters:
+    andi:
+      displayName: Andi
+      speechColour: "#000"
+      looks:
+        normal: assets/characters/AndiNormal.png
+    dika:
+      displayName: Dika
+      speechColour: "#000"
+      looks:
+        normal: assets/characters/DikaNormal.png
+        casual: assets/characters/DikaCasual.png
+    dina:
+      displayName: Dina
+      speechColour: "#000"
+      looks:
+        normal: assets/characters/DinaNormal.png
+    mama:
+      displayName: Mama
+      speechColour: "#000"
+      looks:
+        angry: assets/characters/MamaAngry.png
+    polisi:
+      displayName: Polisi
+      speechColour: "#000"
+      looks:
+        normal: assets/characters/Polisi.png
+
+cgs:
+  phone1: assets/objects/phone1.png
+  phone2: assets/objects/phone2.png
+
+music:
+  rollingCredits: assets/audio/Evan_Schaeffer_-_01_-_Aqueduct.mp3
+  morningBGM: assets/audio/Evan_Schaeffer_-_03_-_Glow.mp3
+sfx:
+  ringtoneSFX: assets/audio/nokia6210-24-elise.mp3
+  ringtoneSFX2: assets/audio/alcatel-top_secret.mp3
+
+extra:
+  spritesheets:
+    rain: assets/ambient/rain.png 17 17
+    sakura: assets/ambient/sakura-petals.png 17 26
+    snowflakes: assets/ambient/snowflakes.png 17 17
+    snowflakes_large: assets/ambient/snowflakes_large.png 64 64

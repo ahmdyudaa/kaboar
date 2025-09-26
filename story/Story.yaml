@@ -1,0 +1,121 @@
+start:
+  - show classroom: WITH FADE CONTINUE
+  - show dika: normal AT LEFT WITH FADE
+  - show andi: normal AT RIGHT WITH FADE
+  - dika says normal: Ndi, ikut aku yok nonton konser. Katanya seru banget sampe malem lagi.
+  - andi says normal: Hmm…
+  - choice:
+    - "Gak dulu, aku punya banyak tugas.":
+      - andi says normal: Gak dulu, aku punya banyak tugas.
+      - hide ALL:
+      - show next: WITH FADE CONTINUE
+      - wait: 2000
+      - show classroom: WITH FADE CONTINUE
+      - show andi: normal AT LEFT WITH FADE
+      - andi says normal: Aku berangkat pagi hari ini
+      - hide ALL:
+      - wait: 2000
+      - scene: nongkrong
+    - "Boleh tuh, ayo aku ikut.":
+      - andi says happy: Boleh tuh, ayo aku ikut.
+      - hide ALL:
+      - show konser: WITH FADE CONTINUE
+      - wait: click
+      - show rumah: WITH FADE CONTINUE
+      - wait: click
+      - show belajar: WITH FADE CONTINUE
+      - wait: click
+      - hide ALL:
+      - wait: 2000
+      - scene: nongkrong
+
+nongkrong:
+  - show classroom: WITH FADE CONTINUE
+  - show dika: normal AT LEFT WITH FADE
+  - show andi: normal AT RIGHT WITH FADE
+  - dika says normal: Ndi! Ayo ikut nongkrong sama gengku seru lho mereka ini.
+  - andi says normal: Hmm…
+  - choice:
+    - "Tolak Ajakan Dika":
+      - andi says normal: Wah, Pengen banget Dik. Tapi kayaknya belum bisa deh malem ini.
+      - dika says normal: Oh ya? Ada acara lain?
+      - andi says normal: Bukan acara sih. Kebetulan Ibu minta tolong ditemenin buat masak makan malam. Udah janji dari kemarin mau bantuin.
+      - dika says normal: Oalah, gitu. Ya udah, nggak apa-apa, Dik.
+      - andi says normal: Makasih ya. Kapan-kapan aku kabarin lagi.
+      - dika says normal: Boleh banget, nanti kabarin aja Dik.
+      - andi says normal: Oke.
+      - hide ALL:
+      - scene: pacaran
+    - "Ikut Ajakan Dika":
+      - andi says happy: Boleh tuh, ayo aku ikut.
+      - hide ALL:
+      - show gasebo: WITH FADE
+      - wait: click
+      - show classroom: WITH FADE
+      - scene: pacaran
+
+
+pacaran:
+  - show taman: WITH FADE CONTINUE
+  - show dika: casual AT LEFT WITH FADE
+  - show dina: normal AT RIGHT WITH FADE
+  - dika says casual: Kamu beneran sayang gak sama aku?
+  - dina says normal: Maksud kamu?
+  - dika says casual: Aku pengen kita ngelakuin hal yang lebih intim.
+  - choice:
+    - "Tolak Ajakan Dika":
+      - dina says normal: Nggak. Aku mau hubungan yang sehat. Mending kita fokus belajar bareng-bareng biar bisa sukses bareng juga.
+    - "Ikut Ajakan Dika":
+      - dina says happy: Hmm... yaudah iya deh, kalau itu bikin kamu seneng.
+      - hide ALL:
+      - scene: endGame
+
+endGame:
+  - deuzi says normal: Quickstart over!
+  - hide ALL:
+  - effect ROLLINGCREDITS:
+    endGame: true
+    text:
+      - RenJS.V2 created by
+      - lunafromthemoon
+      - null
+      - In collaboration with
+      - RockDaFox
+      - null
+      - Inspired by Ren'Py
+      - Powered by PhaserJS
+      - null
+      - null
+      - Thanks for playing
+      - The Quickstart Game
+      - null
+      - background art and cgs by
+      - konett
+      - null
+      - characters by
+      - Shida
+      - null
+      - music by
+      - Evan Schaeffer
+
+
+# menolak:
+#   - show next: WITH FADE CONTINUE
+#   - wait: 2000
+#   - show classroom: WITH FADE CONTINUE
+#   - show andi: normal AT LEFT WITH FADE
+#   - andi says normal: Aku berangkat pagi hari ini
+#   - scene: nongkrong
+
+# setuju:
+#   - show konser: WITH FADE CONTINUE
+#   - wait: click
+#   - show rumah: WITH FADE CONTINUE
+#   - wait: click
+#   - show belajar: WITH FADE CONTINUE
+#   - scene: nongkrong
+
+# ikut nongkrong:
+#   - show gasebo: WITH FADE
+#   - wait: click
+#   - show classroom: WITH FADE
