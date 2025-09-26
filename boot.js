@@ -3,7 +3,7 @@ const RenJSConfig =  {
   'w': 1920,
   'h': 1080,
   'renderer': Phaser.AUTO, // become renderer
-  'scaleMode': Phaser.ScaleManager.EXACT_FIT,
+  'scaleMode': Phaser.ScaleManager.SHOW_ALL,
   'loadingScreen': {
     'background': 'assets/gui/loaderloaderbackground.png',
     'loadingBar': {
