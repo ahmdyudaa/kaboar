@@ -1,216 +1,332 @@
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>KABOAR</title>
 
-    <style>
-      body {
-        margin: 0;
-      }
-      .example-container {
-        overflow: hidden;
-        position: absolute;
-        width: 100%;
-        height: 100%;
-      }
-     
-      #example-scanning-overlay {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        background: transparent;
-        z-index: 2;
-      }
-      @media (min-aspect-ratio: 1/1) {
-        #example-scanning-overlay .inner {
-          width: 50vh;
-          height: 50vh;
-        }
-      }
-      @media (max-aspect-ratio: 1/1) {
-        #example-scanning-overlay .inner {
-          width: 80vw;
-          height: 80vw;
-        }
-      }
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-      #example-scanning-overlay .inner {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        background:
-          linear-gradient(to right, white 10px, transparent 10px) 0 0,
-          linear-gradient(to right, white 10px, transparent 10px) 0 100%,
-          linear-gradient(to left, white 10px, transparent 10px) 100% 0,
-          linear-gradient(to left, white 10px, transparent 10px) 100% 100%,
-          linear-gradient(to bottom, white 10px, transparent 10px) 0 0,
-          linear-gradient(to bottom, white 10px, transparent 10px) 100% 0,
-          linear-gradient(to top, white 10px, transparent 10px) 0 100%,
-          linear-gradient(to top, white 10px, transparent 10px) 100% 100%;
-        background-repeat: no-repeat;
-        background-size: 40px 40px;
+  <!-- A-Frame + MindAR -->
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    :root { --accent: #ff9800; }
+    body {
+      margin: 0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background: linear-gradient(180deg,#0f172a 0%, #071029 100%); color: #fff; min-height: 100vh; padding-bottom: 40px;
+    }
+    .app-header { padding: 1.1rem; text-align: center; animation: fadeIn 1s ease; }
+    .card {
+      border-radius: 12px; box-shadow: 0 6px 18px rgba(2,6,23,0.6); animation: fadeUp 1s ease;
+    }
+    .logo{
+      width: 200px;
+    }
+    .btn-accent { background: var(--accent); color: #111; font-weight: 600; }
+    .btn-accent:hover { background: #e68900; color: #fff; }
+    .chart-wrap { height: 260px; }
+    .fadeUp { animation: fadeUp 0.8s ease; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(15px);} to { opacity: 1; transform: translateY(0);} }
+    @keyframes move { 0%, 100% { top: 0% } 50% { top: calc(100% - 10px) } }
+    .ar-wrap { 
+      height: 70vh; overflow: hidden; border-radius: 10px; border: 3px solid #ff9800;
+      box-shadow: 0 0 15px rgba(255, 152, 0, 0.3); position: relative; background: #000;
+    }
+    a-scene { width: 100%; height: 100%; }
+    .example-container { overflow: hidden; position: absolute; width: 100%; height: 100%; z-index: 10; }
+    #example-scanning-overlay {
+      display: flex; align-items: center; justify-content: center; position: absolute;
+      left: 0; right: 0; top: 0; bottom: 0; background: transparent; z-index: 11;
+    }
+    @media (min-aspect-ratio: 1/1) { #example-scanning-overlay .inner { width: 50vh; height: 50vh; } }
+    @media (max-aspect-ratio: 1/1) { #example-scanning-overlay .inner { width: 80vw; height: 80vw; } }
+    #example-scanning-overlay .inner {
+      display: flex; align-items: center; justify-content: center; position: relative;
+      background: linear-gradient(to right, white 10px, transparent 10px) 0 0,
+        linear-gradient(to right, white 10px, transparent 10px) 0 100%,
+        linear-gradient(to left, white 10px, transparent 10px) 100% 0,
+        linear-gradient(to left, white 10px, transparent 10px) 100% 100%,
+        linear-gradient(to bottom, white 10px, transparent 10px) 0 0,
+        linear-gradient(to bottom, white 10px, transparent 10px) 100% 0,
+        linear-gradient(to top, white 10px, transparent 10px) 0 100%,
+        linear-gradient(to top, white 10px, transparent 10px) 100% 100%;
+      background-repeat: no-repeat; background-size: 40px 40px;
+    }
+    #example-scanning-overlay.hidden { display: none; }
+    #example-scanning-overlay img { opacity: 0.6; width: 90%; align-self: center; }
+    #example-scanning-overlay .inner .scanline {
+      position: absolute; width: 100%; height: 10px; background: white; animation: move 2s linear infinite;
+    }
+    /* Fullscreen button */
+    .fullscreen-btn {
+      position: absolute; bottom: 10px; right: 10px; z-index: 12;
+      background: rgba(0, 0, 0, 0.7); color: white; border: none; border-radius: 50%;
+      width: 40px; height: 40px; font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .fullscreen-btn:hover { background: rgba(0, 0, 0, 0.9); }
+  </style>
+  <script>
+    let basketVideoElement = null, katakVideoElement = null;
+    function getVideoElement(videoEl) {
+      if (videoEl && videoEl.components && videoEl.components.material) {
+        return videoEl.components.material.material.map.image;
       }
-
-      #example-scanning-overlay.hidden {
-        display: none;
-      }
-
-      #example-scanning-overlay img {
-        opacity: 0.6;
-        width: 90%;
-        align-self: center;
-      }
-
-      #example-scanning-overlay .inner .scanline {
-        position: absolute;
-        width: 100%;
-        height: 10px;
-        background: white;
-        animation: move 2s linear infinite;
-      }
-      @keyframes move {
-        0%, 100% { top: 0% }
-        50% { top: calc(100% - 10px) }
-      }
-    </style>
-
-    <script>
-      // Store references to video elements
-      let basketVideoElement = null;
-      let katakVideoElement = null;
-
-      // Function to get the video element from a-video component
-      function getVideoElement(videoEl) {
-        if (videoEl && videoEl.components && videoEl.components.material) {
-          return videoEl.components.material.material.map.image;
-        }
-        return null;
-      }
-
-      AFRAME.registerComponent('videotarget', {
-        init: function () {
-          // Mute all videos by default
-          this.el.addEventListener('loaded', () => {
-            const videoEl = this.el.querySelector('a-video');
-            if (videoEl) {
-              const video = getVideoElement(videoEl);
-              if (video) {
-                video.muted = true;
-              }
+      return null;
+    }
+    AFRAME.registerComponent('videotarget', {
+      init: function () {
+        this.el.addEventListener('loaded', () => {
+          const videoEl = this.el.querySelector('a-video');
+          if (videoEl) {
+            const video = getVideoElement(videoEl);
+            if (video) video.muted = true;
+          }
+        });
+        this.el.addEventListener('targetFound', event => {
+          console.log("Video target found");
+          const videoEl = this.el.querySelector('a-video');
+          if (videoEl) {
+            const video = getVideoElement(videoEl);
+            if (video) {
+              video.muted = false;
+              video.play().catch(e => console.log("Video play error:", e));
             }
-          });
+          }
+          if (this.el.getAttribute('mindar-image-target').targetIndex === "1") {
+            const funFact = this.el.querySelector('#funfact-katak');
+            if (funFact) {
+              funFact.setAttribute('position', '0 -1 0');
+              funFact.setAttribute('visible', 'true');
+              let y = -1;
+              const animate = () => {
+                y += 0.05;
+                if (y <= 0.7) {
+                  funFact.setAttribute('position', `0 ${y} 0`);
+                  requestAnimationFrame(animate);
+                } else {
+                  funFact.setAttribute('position', '0 0.7 0');
+                }
+              };
+              animate();
+            }
+          }
+        });
+        this.el.addEventListener('targetLost', event => {
+          console.log("Video target lost");
+          const videoEl = this.el.querySelector('a-video');
+          if (videoEl) {
+            const video = getVideoElement(videoEl);
+            if (video) {
+              video.pause();
+              video.muted = true;
+            }
+          }
+          if (this.el.getAttribute('mindar-image-target').targetIndex === "1") {
+            const funFact = this.el.querySelector('#funfact-katak');
+            if (funFact) funFact.setAttribute('visible', 'false');
+          }
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+  <div class="container py-3">
+    <header class="app-header">
+      <img src="assets/logo.png" class="logo"></img>
+      <p class="">Belajar Gerak Parabola dengan grafik & AR</p>
+    </header>
 
-          this.el.addEventListener('targetFound', event => {
-            console.log("Video target found");
-            // Play the video and unmute when target is found
-            const videoEl = this.el.querySelector('a-video');
-            if (videoEl) {
-              const video = getVideoElement(videoEl);
-              if (video) {
-                video.muted = false;
-                video.play().catch(e => console.log("Video play error:", e));
-              }
-            }
-            
-            // Show fun fact image with animation if this is the frog target
-            if (this.el.getAttribute('mindar-image-target').targetIndex === "1") {
-              const funFact = this.el.querySelector('#funfact-katak');
-              if (funFact) {
-                // Reset animation
-                funFact.setAttribute('position', '0 -1 0');
-                funFact.setAttribute('visible', 'true');
-                
-                // Animate from bottom to top
-                let y = -1;
-                const animate = () => {
-                  y += 0.05;
-                  if (y <= 0.7) { // Stop slightly above the video
-                    funFact.setAttribute('position', `0 ${y} 0`);
-                    requestAnimationFrame(animate);
-                  } else {
-                    funFact.setAttribute('position', '0 0.7 0'); // Position above the video
-                  }
-                };
-                animate();
-              }
-            }
-          });
-          
-          this.el.addEventListener('targetLost', event => {
-            console.log("Video target lost");
-            // Pause the video and mute when target is lost
-            const videoEl = this.el.querySelector('a-video');
-            if (videoEl) {
-              const video = getVideoElement(videoEl);
-              if (video) {
-                video.pause();
-                video.muted = true;
-              }
-            }
-            
-            // Hide fun fact image
-            if (this.el.getAttribute('mindar-image-target').targetIndex === "1") {
-              const funFact = this.el.querySelector('#funfact-katak');
-              if (funFact) {
-                funFact.setAttribute('visible', 'false');
-              }
-            }
-          });
-        }
-      });
-    </script>
-  </head>
-  <body>
-    <div class="example-container">
-      <div id="example-scanning-overlay">
-        <div class="inner">
-          <div class="scanline"></div>
-        </div>
+    <!-- FORM & GRAFIK -->
+    <div class="card bg-light text-dark mb-3 p-3 fadeUp">
+      <div class="mb-2">
+        <label class="form-label small mb-1">Kecepatan awal v₀ (m/s)</label>
+        <input id="v0" type="number" class="form-control" placeholder="Contoh: 20" />
+      </div>
+      <div class="mb-2">
+        <label class="form-label small mb-1">Sudut θ (derajat)</label>
+        <input id="theta" type="number" class="form-control" placeholder="Contoh: 45" />
+      </div>
+      <div class="mb-2">
+        <label class="form-label small mb-1">Tinggi awal h₀ (m)</label>
+        <input id="h0" type="number" class="form-control" placeholder="Contoh: 0" />
+      </div>
+      <div class="d-grid gap-2 mt-2">
+        <button id="btnHitung" class="btn btn-accent">Hitung & Gambar Lintasan</button>
       </div>
 
-      <a-scene 
-        mindar-image="imageTargetSrc: assets/markers/targets.mind; showStats: false; uiScanning: #example-scanning-overlay;" 
-        embedded 
-        color-space="sRGB" 
-        renderer="colorManagement: true, physicallyCorrectLights" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false"
-      >
-        <a-assets>
-          <!-- Video assets -->
-          <video id="basketVideo" autoplay loop playsinline>
-            <source src="assets/objects/basket.mp4" type="video/mp4">
-          </video>
-          <video id="katakVideo" autoplay loop playsinline>
-            <source src="assets/objects/katak.mp4" type="video/mp4">
-          </video>
-          
-          <!-- Image assets -->
-          <img id="funfact-katak" src="assets/objects/funfact-katak.png">
-        </a-assets>
+      <div id="hasilBox" class="mt-3 p-2 rounded bg-dark text-white small" style="display:none;"></div>
 
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-        <!-- 🎯 marker 0 - Basket video -->
-        <a-entity videotarget mindar-image-target="targetIndex: 0">
-          <a-video src="#basketVideo" position="0 0 0" height="1" width="1.78" rotation="0 0 0"></a-video>
-        </a-entity>
-
-        <!-- 🎯 marker 1 - Katak video and fun fact -->
-        <a-entity videotarget mindar-image-target="targetIndex: 1">
-          <a-video src="#katakVideo" position="0 0 0" height="1" width="1.78" rotation="0 0 0"></a-video>
-          <a-image id="funfact-katak" src="#funfact-katak" position="0 1.2 0" height="1" width="1.6" visible="true"></a-image>
-        </a-entity>
-      </a-scene>
+      <div class="chart-wrap mt-2 bg-white p-2 rounded">
+        <canvas id="grafik"></canvas>
+      </div>
     </div>
-  </body>
+
+    <!-- AR MODE -->
+    <div class="card bg-light text-dark p-3 fadeUp">
+      <h6 class="mb-2">🌀 Mode Scan AR</h6>
+      <div class="ar-wrap">
+        <div class="example-container">
+          <div id="example-scanning-overlay">
+            <div class="inner">
+              <div class="scanline"></div>
+            </div>
+          </div>
+          <button id="fullscreenBtn" class="fullscreen-btn">⛶</button>
+          <a-scene 
+            mindar-image="imageTargetSrc: assets/markers/targets.mind; showStats: false; uiScanning: #example-scanning-overlay;" 
+            embedded 
+            color-space="sRGB" 
+            renderer="colorManagement: true, physicallyCorrectLights" 
+            vr-mode-ui="enabled: false" 
+            device-orientation-permission-ui="enabled: false"
+          >
+            <a-assets>
+              <!-- Video assets -->
+              <video id="basketVideo" autoplay loop playsinline>
+                <source src="assets/objects/basket.mp4" type="video/mp4">
+              </video>
+              <video id="katakVideo" autoplay loop playsinline>
+                <source src="assets/objects/katak.mp4" type="video/mp4">
+              </video>
+              
+              <!-- Image assets -->
+              <img id="funfact-katak" src="assets/objects/funfact-katak.png">
+              <img id="soal-basket" src="assets/objects/soal-basket.png">
+              <img id="soal-katak" src="assets/objects/soal-katak.png">
+            </a-assets>
+
+            <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+            <!-- 🎯 marker 0 - Basket video -->
+            <a-entity videotarget mindar-image-target="targetIndex: 0">
+              <a-video src="#basketVideo" position="0 0 0" height="1" width="1.78" rotation="0 0 0"></a-video>
+            </a-entity>
+
+            <!-- 🎯 marker 1 - Katak video and fun fact -->
+            <a-entity videotarget mindar-image-target="targetIndex: 1">
+              <a-video src="#katakVideo" position="0 0 0" height="1" width="1.78" rotation="0 0 0"></a-video>
+              <a-image id="funfact-katak" src="#funfact-katak" position="0 1.2 0" height="1" width="1.6" visible="true"></a-image>
+            </a-entity>
+
+            <!-- 🎯 marker 2 - Basket Soal -->
+            <a-entity mindar-image-target="targetIndex: 2">
+              <a-image id="soal-basket" src="#soal-basket" position="0 0 0" height="1" width="1.6" visible="true"></a-image>
+            </a-entity>
+
+            <!-- 🎯 marker 3 - Katak Soal -->
+            <a-entity mindar-image-target="targetIndex: 3">
+              <a-image id="soal-katak" src="#soal-katak" position="0 0 0" height="1" width="1.6" visible="true"></a-image>
+            </a-entity>
+          </a-scene>
+        </div>
+      </div>
+      <p class="small text-muted mt-2 mb-0">
+        Gunakan Chrome/Firefox di HP, izinkan akses kamera. Cetak marker atau tampilkan di layar lain.
+      </p>
+    </div>
+  </div>
+
+<script>
+  (function(){
+    const g = 9.8, btn = document.getElementById('btnHitung'), hasilBox = document.getElementById('hasilBox'),
+      ctx = document.getElementById('grafik').getContext('2d'), 
+      computeTrajectory = (v0, thetaDeg, h0) => {
+        const theta = thetaDeg * Math.PI / 180, vx = v0 * Math.cos(theta), vy = v0 * Math.sin(theta),
+          disc = vy*vy + 2*g*h0, tFlight = (vy + Math.sqrt(disc)) / g, range = vx * tFlight,
+          tPeak = vy / g, yMax = h0 + vy * tPeak - 0.5 * g * tPeak * tPeak;
+        return {vx, vy, tFlight, range, yMax};
+      },
+      generateSamples = (vx, vy, h0, tFlight) => {
+        const points = [];
+        for (let i=0; i<=60; i++) {
+          const t = (i/60) * tFlight, x = vx * t, y = h0 + vy * t - 0.5 * g * t * t;
+          points.push({x: Number(x.toFixed(2)), y: Math.max(0, Number(y.toFixed(2)))});
+        }
+        return points;
+      },
+      renderChart = points => {
+        if (window.chart) window.chart.destroy();
+        window.chart = new Chart(ctx, {
+          type: 'scatter', data: {
+            datasets: [{
+              label: 'Lintasan', data: points, showLine: true,
+              borderColor: 'rgba(255,152,0,1)', backgroundColor: 'rgba(255,152,0,0.3)',
+              fill: true, tension: 0.25
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { title: { display: true, text: 'Jarak (m)' } },
+              y: { title: { display: true, text: 'Tinggi (m)' }, beginAtZero: true }
+            }
+          }
+        });
+      };
+    btn.addEventListener('click', function(){
+      const v0 = parseFloat(document.getElementById('v0').value),
+        theta = parseFloat(document.getElementById('theta').value),
+        h0 = parseFloat(document.getElementById('h0').value);
+      if (isNaN(v0) || isNaN(theta) || isNaN(h0)) {
+        hasilBox.style.display = 'block';
+        hasilBox.innerHTML = '⚠️ Lengkapi semua input dengan angka yang valid.';
+        return;
+      }
+      const res = computeTrajectory(v0, theta, h0);
+      hasilBox.style.display = 'block';
+      hasilBox.innerHTML = `
+        ⏱️ <b>Waktu terbang</b> = ${res.tFlight.toFixed(2)} s <br>
+        📏 <b>Jangkauan</b> = ${res.range.toFixed(2)} m <br>
+        🚀 <b>Tinggi max</b> = ${res.yMax.toFixed(2)} m
+      `;
+      const points = generateSamples(res.vx, res.vy, h0, res.tFlight);
+      renderChart(points);
+    });
+    renderChart([{x:0,y:0}]);
+    
+    // Fullscreen functionality
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const arScene = document.querySelector('.ar-wrap');
+    
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        if (arScene.requestFullscreen) {
+          arScene.requestFullscreen();
+        } else if (arScene.webkitRequestFullscreen) {
+          arScene.webkitRequestFullscreen();
+        } else if (arScene.msRequestFullscreen) {
+          arScene.msRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+    });
+    
+    // Update button icon when fullscreen state changes
+    document.addEventListener('fullscreenchange', () => {
+      fullscreenBtn.textContent = document.fullscreenElement ? '⛶' : '⛶';
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+      fullscreenBtn.textContent = document.webkitFullscreenElement ? '⛶' : '⛶';
+    });
+    document.addEventListener('msfullscreenchange', () => {
+      fullscreenBtn.textContent = document.msFullscreenElement ? '⛶' : '⛶';
+    });
+  })();
+</script>
+</body>
 </html>

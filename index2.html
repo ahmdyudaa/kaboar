@@ -1,0 +1,216 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+      }
+      .example-container {
+        overflow: hidden;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+     
+      #example-scanning-overlay {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background: transparent;
+        z-index: 2;
+      }
+      @media (min-aspect-ratio: 1/1) {
+        #example-scanning-overlay .inner {
+          width: 50vh;
+          height: 50vh;
+        }
+      }
+      @media (max-aspect-ratio: 1/1) {
+        #example-scanning-overlay .inner {
+          width: 80vw;
+          height: 80vw;
+        }
+      }
+
+      #example-scanning-overlay .inner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+
+        background:
+          linear-gradient(to right, white 10px, transparent 10px) 0 0,
+          linear-gradient(to right, white 10px, transparent 10px) 0 100%,
+          linear-gradient(to left, white 10px, transparent 10px) 100% 0,
+          linear-gradient(to left, white 10px, transparent 10px) 100% 100%,
+          linear-gradient(to bottom, white 10px, transparent 10px) 0 0,
+          linear-gradient(to bottom, white 10px, transparent 10px) 100% 0,
+          linear-gradient(to top, white 10px, transparent 10px) 0 100%,
+          linear-gradient(to top, white 10px, transparent 10px) 100% 100%;
+        background-repeat: no-repeat;
+        background-size: 40px 40px;
+      }
+
+      #example-scanning-overlay.hidden {
+        display: none;
+      }
+
+      #example-scanning-overlay img {
+        opacity: 0.6;
+        width: 90%;
+        align-self: center;
+      }
+
+      #example-scanning-overlay .inner .scanline {
+        position: absolute;
+        width: 100%;
+        height: 10px;
+        background: white;
+        animation: move 2s linear infinite;
+      }
+      @keyframes move {
+        0%, 100% { top: 0% }
+        50% { top: calc(100% - 10px) }
+      }
+    </style>
+
+    <script>
+      // Store references to video elements
+      let basketVideoElement = null;
+      let katakVideoElement = null;
+
+      // Function to get the video element from a-video component
+      function getVideoElement(videoEl) {
+        if (videoEl && videoEl.components && videoEl.components.material) {
+          return videoEl.components.material.material.map.image;
+        }
+        return null;
+      }
+
+      AFRAME.registerComponent('videotarget', {
+        init: function () {
+          // Mute all videos by default
+          this.el.addEventListener('loaded', () => {
+            const videoEl = this.el.querySelector('a-video');
+            if (videoEl) {
+              const video = getVideoElement(videoEl);
+              if (video) {
+                video.muted = true;
+              }
+            }
+          });
+
+          this.el.addEventListener('targetFound', event => {
+            console.log("Video target found");
+            // Play the video and unmute when target is found
+            const videoEl = this.el.querySelector('a-video');
+            if (videoEl) {
+              const video = getVideoElement(videoEl);
+              if (video) {
+                video.muted = false;
+                video.play().catch(e => console.log("Video play error:", e));
+              }
+            }
+            
+            // Show fun fact image with animation if this is the frog target
+            if (this.el.getAttribute('mindar-image-target').targetIndex === "1") {
+              const funFact = this.el.querySelector('#funfact-katak');
+              if (funFact) {
+                // Reset animation
+                funFact.setAttribute('position', '0 -1 0');
+                funFact.setAttribute('visible', 'true');
+                
+                // Animate from bottom to top
+                let y = -1;
+                const animate = () => {
+                  y += 0.05;
+                  if (y <= 0.7) { // Stop slightly above the video
+                    funFact.setAttribute('position', `0 ${y} 0`);
+                    requestAnimationFrame(animate);
+                  } else {
+                    funFact.setAttribute('position', '0 0.7 0'); // Position above the video
+                  }
+                };
+                animate();
+              }
+            }
+          });
+          
+          this.el.addEventListener('targetLost', event => {
+            console.log("Video target lost");
+            // Pause the video and mute when target is lost
+            const videoEl = this.el.querySelector('a-video');
+            if (videoEl) {
+              const video = getVideoElement(videoEl);
+              if (video) {
+                video.pause();
+                video.muted = true;
+              }
+            }
+            
+            // Hide fun fact image
+            if (this.el.getAttribute('mindar-image-target').targetIndex === "1") {
+              const funFact = this.el.querySelector('#funfact-katak');
+              if (funFact) {
+                funFact.setAttribute('visible', 'false');
+              }
+            }
+          });
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div class="example-container">
+      <div id="example-scanning-overlay">
+        <div class="inner">
+          <div class="scanline"></div>
+        </div>
+      </div>
+
+      <a-scene 
+        mindar-image="imageTargetSrc: assets/markers/targets.mind; showStats: false; uiScanning: #example-scanning-overlay;" 
+        embedded 
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false"
+      >
+        <a-assets>
+          <!-- Video assets -->
+          <video id="basketVideo" autoplay loop playsinline>
+            <source src="assets/objects/basket.mp4" type="video/mp4">
+          </video>
+          <video id="katakVideo" autoplay loop playsinline>
+            <source src="assets/objects/katak.mp4" type="video/mp4">
+          </video>
+          
+          <!-- Image assets -->
+          <img id="funfact-katak" src="assets/objects/funfact-katak.png">
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <!-- 🎯 marker 0 - Basket video -->
+        <a-entity videotarget mindar-image-target="targetIndex: 0">
+          <a-video src="#basketVideo" position="0 0 0" height="1" width="1.78" rotation="0 0 0"></a-video>
+        </a-entity>
+
+        <!-- 🎯 marker 1 - Katak video and fun fact -->
+        <a-entity videotarget mindar-image-target="targetIndex: 1">
+          <a-video src="#katakVideo" position="0 0 0" height="1" width="1.78" rotation="0 0 0"></a-video>
+          <a-image id="funfact-katak" src="#funfact-katak" position="0 1.2 0" height="1" width="1.6" visible="true"></a-image>
+        </a-entity>
+      </a-scene>
+    </div>
+  </body>
+</html>
